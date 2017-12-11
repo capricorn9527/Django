@@ -10,27 +10,26 @@ import logging
 import pandas
 import chardet
 import unicodecsv
+import json
 tagger = pos_tagger.load_model(lang = 'zh')
 
 def hello(request):
     # return HttpResponse("Hello world ! ")
     text=request.GET.get("text")
-    context = {}
-    context['hello'] = parse_data(text)
+    context = parse_data(text)
     #返回页面
     # return render(request, 'hello.html', context)
-
     #返回内容
-    return HttpResponse(context['hello'])
+    return HttpResponse(json.dumps(context, encoding="UTF-8", ensure_ascii=False))
 
 
 def parse_data(text):
     words = segmenter.seg(text);
     words_p = "";
+    context = {}
     # POS Tagging
     tagging = tagger.predict(words);
     for (w, t) in tagging:
-        str = w + "(" + t+ ")"
-        words_p += str + ",";
-    tmp = text.encode("utf-8") + " : ".encode("utf-8") + words_p.encode("utf-8")
-    return tmp;
+        context[w] = t
+    #tmp = text.encode("utf-8") + " : ".encode("utf-8") + words_p.encode("utf-8")
+    return context;
